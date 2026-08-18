@@ -4,6 +4,7 @@ import com.codewithpcodes.glimserver.token.Token;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -41,6 +42,11 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String phoneNumber;
 
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    @Column(nullable = false)
+    private Language language = Language.ENGLISH;
+
     @Builder.Default
     @Column(nullable = false)
     private boolean accountLocked = false;
@@ -70,7 +76,12 @@ public class User implements UserDetails {
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", insertable = false)
+    private LocalDateTime updatedAt;
 
     @Override
     public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {

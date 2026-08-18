@@ -44,11 +44,13 @@ glim:
     secret: 8wWYjFpCy6Otp48mdnWDgkTjt5IjPPJqAKpqKhzAEZM=
     expiration: 86400000 #24 hours
     refresh-token:
-      expiration: 604800000 #7 days
+      expiration: 7776000000 #90 days
   twilio:
     account-sid: SK442db45c9d4a0d15bf070b2ae29ca5a3
     auth-token: LLvuYKXx7RfinmQ6xbtTkYiPms663VuA
     trial-number: +17372508034
+    messaging-service-sid:
+    status-callback-url:
     client-secret: LLvuYKXx7RfinmQ6xbtTkYiPms663VuA
   storage:
     provider: r2

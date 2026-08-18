@@ -30,7 +30,7 @@ public class StorageController {
 
     /** Step 1 — ask for a URL. */
     @PostMapping("/upload-url")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MOG', 'FINANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PASTOR', 'FINANCE', 'DEPARTMENT_HEAD', 'MEDIA')")
     public ResponseEntity<PresignedUpload> createUploadUrl(@RequestBody @Valid UploadUrlRequest req) {
         return ResponseEntity.ok(storageService.createUploadUrl(
                 req.category(), req.filename(), req.contentType(), req.size()));
@@ -38,7 +38,7 @@ public class StorageController {
 
     /** Step 3 — tell the server the upload landed. */
     @PostMapping("/confirm")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MOG', 'FINANCE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PASTOR', 'FINANCE', 'DEPARTMENT_HEAD', 'MEDIA')")
     public ResponseEntity<StoredObject> confirm(@RequestParam @NotBlank String key) {
         return ResponseEntity.ok(storageService.confirmUpload(key));
     }

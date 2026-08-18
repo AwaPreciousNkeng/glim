@@ -1,8 +1,10 @@
 package com.codewithpcodes.glimserver.user;
 
 public enum Role {
-    MOG,
+    PASTOR,
     FINANCE,
     MEMBER,
+    MEDIA,
+    DEPARTMENT_HEAD,
     ADMIN
 }
