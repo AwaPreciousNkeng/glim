@@ -1,0 +1,66 @@
+spring:
+  application:
+    name: glim-server
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/glim_db
+    username: pcodes
+    password: pcodes
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+server:
+  port: 8080
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/css,text/plain,application/javascript
+    min-response-size: 1024
+
+glim:
+  production: false
+  jwt:
+    secret: 8wWYjFpCy6Otp48mdnWDgkTjt5IjPPJqAKpqKhzAEZM=
+    expiration: 86400000 #24 hours
+    refresh-token:
+      expiration: 604800000 #7 days
+  twilio:
+    account-sid: SK442db45c9d4a0d15bf070b2ae29ca5a3
+    auth-token: LLvuYKXx7RfinmQ6xbtTkYiPms663VuA
+    trial-number: +17372508034
+    client-secret: LLvuYKXx7RfinmQ6xbtTkYiPms663VuA
+  storage:
+    provider: r2
+    endpoint: https://415d23cb90f89dfd858446f5d2b0f2ed.r2.cloudflarestorage.com
+    region: auto
+    access-key: cd78bb358345fd73c48512d09b5c25d3
+    secret-key: 82355face70bbd04b0bd6a538fcb61bbcc2af6b51cd41a9eb746b9ac634ef9bc
+    bucket: glim-media
+    public-base-url: https://pub-b164bcfb651f4dc48170fcbd0690cc56.r2.dev
+    path-style-access: true
+    presign-upload-ttl: 15m
+    presign-download-ttl: 1h
+
+  oauth2:
+    redirect-url: http://localhost:3000/oauth2/redirect
