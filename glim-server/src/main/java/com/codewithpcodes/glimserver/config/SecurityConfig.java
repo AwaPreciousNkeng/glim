@@ -46,7 +46,8 @@ public class SecurityConfig {
             "/swagger-resources",
             "/configuration/ui",
             "/configuration/security",
-            "/swagger-ui.html"
+            "/swagger-ui.html",
+            "/api/v1/webhooks/**"
     };
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authProvider;

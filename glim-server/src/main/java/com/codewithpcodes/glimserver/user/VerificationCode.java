@@ -13,7 +13,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "verification_codes")
+@Table(name = "verification_codes",
+        indexes = @Index(name = "idx_verification_user_purpose",
+                columnList = "user_id, purpose, consumed_at"))
 public class VerificationCode {
 
     @Id
@@ -32,6 +34,7 @@ public class VerificationCode {
     private CodePurpose purpose;
 
     @Column(nullable = false)
+    @Builder.Default
     private int attempts = 0;
 
     @Column(name = "expires_at", nullable = false)
