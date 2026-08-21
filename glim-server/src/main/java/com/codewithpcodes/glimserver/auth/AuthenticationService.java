@@ -1,20 +1,15 @@
 package com.codewithpcodes.glimserver.auth;
 
-import com.codewithpcodes.glimserver.auth.dtos.LoginRequest;
-import com.codewithpcodes.glimserver.auth.dtos.AuthenticationResponse;
-import com.codewithpcodes.glimserver.auth.dtos.RegisterRequest;
+import com.codewithpcodes.glimserver.auth.dtos.*;
 import com.codewithpcodes.glimserver.config.JwtService;
 import com.codewithpcodes.glimserver.exceptions.*;
+import com.codewithpcodes.glimserver.notification.email.VerificationService;
 import com.codewithpcodes.glimserver.token.Token;
 import com.codewithpcodes.glimserver.token.TokenRepository;
 import com.codewithpcodes.glimserver.token.TokenType;
-import com.codewithpcodes.glimserver.user.Role;
-import com.codewithpcodes.glimserver.user.User;
-import com.codewithpcodes.glimserver.user.UserRepository;
-import com.codewithpcodes.glimserver.user.UserResponse;
+import com.codewithpcodes.glimserver.user.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -25,11 +20,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -44,12 +41,10 @@ public class AuthenticationService {
 
     private static final int MAX_ATTEMPTS = 5;
     private static final int LOCK_DURATION = 15;
+    private final VerificationService verificationService;
 
     @Transactional
     public AuthenticationResponse register(RegisterRequest request) {
-        String defaultProfilePicture = "https://ui-avatars.com/api?name=" +
-                URLEncoder.encode(request.firstName() + " " + request.lastName(), StandardCharsets.UTF_8) +
-                "&background=random&color=fff&size=256";
 
         if (userRepository.existsByEmail(request.email())) {
             log.error("Email already exists with email::{}", request.email());
@@ -62,9 +57,13 @@ public class AuthenticationService {
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .role(Role.MEMBER)
-                .avatarKey(defaultProfilePicture)
+                .language(request.preferredLanguage() == null ? Language.ENGLISH : request.preferredLanguage())
                 .build();
         userRepository.save(user);
+
+        verificationService.sendVerificationEmail(user);
+        log.info("Successfully registered user {}", user.getEmail());
+        return issueTokens(user);
     }
 
     public AuthenticationResponse authenticate(LoginRequest request) {
@@ -94,13 +93,18 @@ public class AuthenticationService {
             );
         }
         resetFailedAttempts(user);
+        log.info("User {} logged in successfully", user.getEmail());
+        return issueTokens(user);
+    }
+
+    private AuthenticationResponse issueTokens(User user) {
         var accessToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
 
         revokeAllUserTokens(user);
         saveUserToken(user, accessToken);
 
-        log.info("User {} logged in successfully", user.getEmail());
+
         return AuthenticationResponse.fromAuth(
                 accessToken,
                 refreshToken,
@@ -108,13 +112,14 @@ public class AuthenticationService {
         );
     }
 
-    public AuthenticationResponse refreshToken(
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) throws IOException {
+    public AuthenticationResponse refreshToken(HttpServletRequest request) {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        String refreshToken = getRefreshToken(request, authHeader);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new UnauthorizedException("Missing refresh token");
+        }
+
+        String refreshToken = authHeader.substring(7);
 
         String userEmail = jwtService.extractUsername(refreshToken);
         if (userEmail == null) {
@@ -135,29 +140,7 @@ public class AuthenticationService {
         return AuthenticationResponse.fromAuth(accessToken, refreshToken, UserResponse.from(user));
     }
 
-    private static @NonNull String getRefreshToken(HttpServletRequest request, String authHeader) {
-        String refreshToken = null;
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            refreshToken = authHeader.substring(7);
-        } else if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals("refresh_token")) {
-                    refreshToken = cookie.getValue();
-                }
-            }
-        }
-
-        if (refreshToken == null) {
-            throw new UnauthorizedException("Invalid refresh token.");
-        }
-        return refreshToken;
-    }
-
     public AuthenticationResponse createAdmin(RegisterRequest request) {
-        String defaultProfilePicture = "https://ui-avatars.com/api?name=" +
-                URLEncoder.encode(request.firstName() + " " + request.lastName(), StandardCharsets.UTF_8) +
-                "&background=random&color=fff&size=256";
-
         if (userRepository.existsByEmail(request.email())) {
             throw new DuplicateResourceException("User already exists.");
         }
@@ -167,21 +150,53 @@ public class AuthenticationService {
                 .lastName(request.lastName())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
-                .profilePictureUrl(defaultProfilePicture)
                 .role(Role.ADMIN)
                 .build();
 
         User savedAdmin = userRepository.save(admin);
 
-        String accessToken = jwtService.generateToken(savedAdmin);
-        String refreshToken = jwtService.generateRefreshToken(savedAdmin);
+        return issueTokens(admin);
+    }
 
-        saveUserToken(savedAdmin, accessToken);
-        return AuthenticationResponse.fromAuth(
-                accessToken,
-                refreshToken,
-                UserResponse.from(savedAdmin)
-        );
+    @Transactional
+    public void forgotPassword(ForgotPasswordRequest request) {
+        userRepository.findByEmail(request.email())
+                .ifPresent(verificationService::sendResetCode);
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new InvalidCodeException("That code is not correct."));
+
+        verificationService.consumeResetCode(user, request.code());
+
+        if (!request.newPassword().equals(request.confirmNewPassword())) {
+            throw new BadRequestException("Passwords do not match.");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        user.setFailedLoginAttempts(0);
+        user.setLockedUntil(null);
+
+        revokeAllUserTokens(user);
+    }
+
+    @Transactional
+    public void changeEmail(UUID userId, ChangeEmailRequest request) {
+        User user = userRepository.findById(userId).orElseThrow();
+
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            throw new InvalidCredentialsException("Invalid password.");
+        }
+
+        if (userRepository.existsByEmail(request.newEmail())) {
+            throw new DuplicateResourceException("Email already in use.");
+        }
+
+        user.setEmail(request.newEmail());
+        user.setEmailVerifiedAt(null);
+        verificationService.sendVerificationEmail(user);
     }
 
     private void revokeAllUserTokens(User user) {

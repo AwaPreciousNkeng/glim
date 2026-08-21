@@ -1,96 +1,82 @@
 package com.codewithpcodes.glimserver.auth;
 
-import com.codewithpcodes.glimserver.auth.dtos.LoginRequest;
-import com.codewithpcodes.glimserver.auth.dtos.AuthenticationResponse;
-import com.codewithpcodes.glimserver.auth.dtos.RegisterRequest;
-import com.codewithpcodes.harmoniq.user.UserResponse;
+import com.codewithpcodes.glimserver.auth.dtos.*;
+import com.codewithpcodes.glimserver.notification.email.VerificationService;
+import com.codewithpcodes.glimserver.user.User;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@Tag(name = "Authentication", description = "Authentication Management Endpoints")
+@Tag(name = "Authentication Management", description = "Authentication Management Endpoints")
 public class AuthenticationController {
 
     private final AuthenticationService service;
-
-    @Value("${application.production}")
-    private boolean production;
+    private final VerificationService verificationService;
 
     @PostMapping("/register")
-    public ResponseEntity<Void> register(
+    public ResponseEntity<AuthenticationResponse> register(
             @Valid @RequestBody RegisterRequest request
     ) {
-        service.register(request);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .build();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.register(request));
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
+        verificationService.consumeVerificationToken(token);
+        return ResponseEntity.ok()
+                .contentType(MediaType.TEXT_HTML)
+                .body(verifiedPage());
+    }
+
+    @PostMapping("/password/forgot")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void forgot(@RequestBody @Valid ForgotPasswordRequest request) {
+        service.forgotPassword(request);
+    }
+
+    @PostMapping("/password/reset")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void reset(@RequestBody @Valid ResetPasswordRequest request) {
+        service.resetPassword(request);
+    }
+
+    @PostMapping("/email/change")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void changeEmail(@AuthenticationPrincipal User user, ChangeEmailRequest request) {
+        service.changeEmail(user.getId(), request);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/admin")
-    public ResponseEntity<UserResponse> createAdmin(
+    public ResponseEntity<AuthenticationResponse> createAdmin(
             @Valid @RequestBody RegisterRequest request
     ) {
-        AuthenticationResponse authResponse = service.createAdmin(request);
-        return getUserResponse(authResponse);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.createAdmin(request));
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<UserResponse> authenticate(
+    public ResponseEntity<AuthenticationResponse> authenticate(
             @Valid @RequestBody LoginRequest request
     ) {
-        AuthenticationResponse authResponse = service.authenticate(request);
-        return getUserResponse(authResponse);
+        return ResponseEntity.ok(service.authenticate(request));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<UserResponse> refreshToken(
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) throws IOException {
-        AuthenticationResponse authResponse = service.refreshToken(request, response);
-        return getUserResponse(authResponse);
-    }
-
-    @NonNull
-    private ResponseEntity<UserResponse> getUserResponse(AuthenticationResponse authResponse) {
-        ResponseCookie accessCookie = ResponseCookie.from("access_token", authResponse.accessToken())
-                .httpOnly(true)
-                .secure(production)
-                .path("/")
-                .maxAge(15 * 60)
-                .sameSite("Lax")
-                .build();
-
-        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", authResponse.refreshToken())
-                .httpOnly(true)
-                .secure(production)
-                .path("/api/v1/auth/refresh")
-                .maxAge(7 * 24 * 60 * 60)
-                .sameSite("Lax")
-                .build();
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                .body(authResponse.user());
+    public ResponseEntity<AuthenticationResponse> refreshToken(
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.ok(service.refreshToken(request));
     }
 }

@@ -1,6 +1,6 @@
 package com.codewithpcodes.glimserver.auth.dtos;
 
-import com.codewithpcodes.harmoniq.user.UserResponse;
+import com.codewithpcodes.glimserver.user.UserResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record AuthenticationResponse(

@@ -1,5 +1,6 @@
 package com.codewithpcodes.glimserver.auth.dtos;
 
+import com.codewithpcodes.glimserver.user.Language;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -26,6 +27,6 @@ public record RegisterRequest(
         @Size(min = 8, max = 72, message = "Password must be at least 6 characters long")
         String password,
 
-        String preferredLanguage
+        Language preferredLanguage
 ) {
 }

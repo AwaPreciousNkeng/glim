@@ -15,4 +15,5 @@ public class MailProperties {
     private int resetMaxAttempts = 5;
     private Duration resendCooldown = Duration.ofSeconds(60);
     private int maxSendsPerHour = 5;
+    private String verificationBaseUrl;
 }
