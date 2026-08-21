@@ -1,4 +1,4 @@
-package com.codewithpcodes.glimserver.auth;
+package com.codewithpcodes.glimserver.auth.dtos;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -7,9 +7,11 @@ import jakarta.validation.constraints.Size;
 
 public record RegisterRequest(
         @NotBlank(message = "First name is required")
+        @Size(max = 100, message = "First name must be at most 100 characters long")
         String firstName,
 
         @NotBlank(message = "Last name is required")
+        @Size(max = 100, message = "Last name must be at most 100 characters long")
         String lastName,
 
         @NotBlank(message = "Email is required")
@@ -17,11 +19,13 @@ public record RegisterRequest(
         String email,
 
         @NotBlank(message = "Phone number is required")
-        @Pattern(regexp = "")
+        @ValidPhoneNumber(defaultRegion = "CM", message = "Please enter a valid phone number")
         String phoneNumber,
 
         @NotBlank(message = "Password is required")
-        @Size(min = 6, message = "Password must be at least 6 characters long")
-        String password
+        @Size(min = 8, max = 72, message = "Password must be at least 6 characters long")
+        String password,
+
+        String preferredLanguage
 ) {
 }

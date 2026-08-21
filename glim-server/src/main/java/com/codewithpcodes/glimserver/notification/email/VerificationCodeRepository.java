@@ -1,4 +1,4 @@
-package com.codewithpcodes.glimserver.user;
+package com.codewithpcodes.glimserver.notification.email;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -19,6 +19,8 @@ public interface VerificationCodeRepository extends JpaRepository<VerificationCo
     long countRecent(@Param("userId") UUID userId,
                      @Param("purpose") CodePurpose purpose,
                      @Param("since") Instant since);
+
+    Optional<VerificationCode> findByCodeHashAndPurpose(String codeHash, CodePurpose purpose);
 
     @Modifying
     @Transactional

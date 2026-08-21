@@ -1,6 +1,5 @@
 package com.codewithpcodes.glimserver.notification;
 
-import com.codewithpcodes.glimserver.notification.twilio.TwilioSmsSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -17,14 +16,13 @@ public class NotificationDispatcher {
 
     private final ResourceBundleMessageSource messages;
     private final FcmPushSender pushSender;
-    private final TwilioSmsSender smsSender;
     private final DeviceTokenRepository deviceTokenRepository;
     private final NotificationRepository inboxRepository;
     private final NotificationDeliveryRepository deliveryRepository;
     private final RecipientQueryRepository recipientRepository;
 
     /** A member as far as notifications are concerned — no full User needed. */
-    public record Recipient(UUID userId, String language, String phone) {}
+    public record Recipient(UUID userId, String language, String email) {}
 
     // ---------------------------------------------------------------
     // SINGLE RECIPIENT
@@ -129,21 +127,6 @@ public class NotificationDispatcher {
                 NotificationType.Channel.PUSH,
                 o.success() ? DeliveryStatus.SENT : DeliveryStatus.FAILED,
                 o.messageId(), o.errorCode()));
-    }
-
-    private void deliverSms(UUID batchId, List<Recipient> recipients,
-                            NotificationType type, Rendered text) {
-        for (Recipient r : recipients) {
-            if (r.phone() == null) {
-                recordDelivery(batchId, r.userId(), type,
-                        NotificationType.Channel.SMS, DeliveryStatus.NO_DEVICE, null, null);
-                continue;
-            }
-            var outcome = smsSender.sendAndReport(r.phone(), text.body());
-            recordDelivery(batchId, r.userId(), type, NotificationType.Channel.SMS,
-                    outcome.success() ? DeliveryStatus.SENT : DeliveryStatus.FAILED,
-                    outcome.sid(), outcome.errorCode());
-        }
     }
 
     private void deliverInbox(UUID batchId, List<Recipient> recipients,

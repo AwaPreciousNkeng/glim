@@ -1,14 +1,17 @@
 package com.codewithpcodes.glimserver.auth;
 
-import com.codewithpcodes.harmoniq.config.JwtService;
-import com.codewithpcodes.harmoniq.exceptions.*;
-import com.codewithpcodes.harmoniq.token.Token;
-import com.codewithpcodes.harmoniq.token.TokenRepository;
-import com.codewithpcodes.harmoniq.token.TokenType;
-import com.codewithpcodes.harmoniq.user.Role;
-import com.codewithpcodes.harmoniq.user.User;
-import com.codewithpcodes.harmoniq.user.UserRepository;
-import com.codewithpcodes.harmoniq.user.UserResponse;
+import com.codewithpcodes.glimserver.auth.dtos.LoginRequest;
+import com.codewithpcodes.glimserver.auth.dtos.AuthenticationResponse;
+import com.codewithpcodes.glimserver.auth.dtos.RegisterRequest;
+import com.codewithpcodes.glimserver.config.JwtService;
+import com.codewithpcodes.glimserver.exceptions.*;
+import com.codewithpcodes.glimserver.token.Token;
+import com.codewithpcodes.glimserver.token.TokenRepository;
+import com.codewithpcodes.glimserver.token.TokenType;
+import com.codewithpcodes.glimserver.user.Role;
+import com.codewithpcodes.glimserver.user.User;
+import com.codewithpcodes.glimserver.user.UserRepository;
+import com.codewithpcodes.glimserver.user.UserResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,6 +23,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -41,7 +45,8 @@ public class AuthenticationService {
     private static final int MAX_ATTEMPTS = 5;
     private static final int LOCK_DURATION = 15;
 
-    public void register(RegisterRequest request) {
+    @Transactional
+    public AuthenticationResponse register(RegisterRequest request) {
         String defaultProfilePicture = "https://ui-avatars.com/api?name=" +
                 URLEncoder.encode(request.firstName() + " " + request.lastName(), StandardCharsets.UTF_8) +
                 "&background=random&color=fff&size=256";
@@ -56,13 +61,13 @@ public class AuthenticationService {
                 .lastName(request.lastName())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
-                .role(Role.USER)
-                .profilePictureUrl(defaultProfilePicture)
+                .role(Role.MEMBER)
+                .avatarKey(defaultProfilePicture)
                 .build();
         userRepository.save(user);
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public AuthenticationResponse authenticate(LoginRequest request) {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new ResourceNotFoundException("Invalid email or password."));
         checkLockOut(user);

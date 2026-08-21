@@ -1,4 +1,4 @@
-package com.codewithpcodes.glimserver.auth;
+package com.codewithpcodes.glimserver.auth.dtos;
 
 import com.codewithpcodes.harmoniq.user.UserResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;

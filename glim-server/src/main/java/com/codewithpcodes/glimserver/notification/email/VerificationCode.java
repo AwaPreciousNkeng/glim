@@ -1,5 +1,6 @@
-package com.codewithpcodes.glimserver.user;
+package com.codewithpcodes.glimserver.notification.email;
 
+import com.codewithpcodes.glimserver.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

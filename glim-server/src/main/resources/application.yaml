@@ -13,6 +13,30 @@ spring:
       connection-timeout: 30000
       idle-timeout: 600000
 
+  mail:
+    host: smtp-relay.brevo.com
+    port: 587
+    username: pcodes
+    password: pcodes
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id:
+            client-secret:
+            scope:
+              - email
+              - profile
+          facebook:
+            client-id:
+            client-secret:
+            scope:
+              - email
+              - public_profile
   servlet:
     multipart:
       max-file-size: 5MB
@@ -46,23 +70,21 @@ glim:
     otp-max-attempts: 5
     otp-resend-cooldown: 30s
     otp-max-resends-per-hour: 3
-  push:
-    public-key: BIzGkIFVigmaJEiK915VXfGXnoSnx8fvejsfmED65xTkqAQzxnKz_Glxk7weWIzZWInFYQKaWMWh9TyzuS8S4ZY
-    private-key: RhqYPrVEjaIWTeQEsxZLdPJG3GZz5KQHQeB5bO8iF0k
-    subject: mailto:awaprecious3t@gmail.com
   jwt:
     secret: 8wWYjFpCy6Otp48mdnWDgkTjt5IjPPJqAKpqKhzAEZM=
     expiration: 86400000 #24 hours
     refresh-token:
       expiration: 7776000000 #90 days
   firebase-service-account-b64: ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAiZ2xpbS1jaXR5IiwKICAicHJpdmF0ZV9rZXlfaWQiOiAiZTZiYWQwZGJkMGRlZDIwMGQ3NDg4YjRlNWY5ZmNiY2E5NTcyZmZlYSIsCiAgInByaXZhdGVfa2V5IjogIi0tLS0tQkVHSU4gUFJJVkFURSBLRVktLS0tLVxuTUlJRXZBSUJBREFOQmdrcWhraUc5dzBCQVFFRkFBU0NCS1l3Z2dTaUFnRUFBb0lCQVFEWUQ4N0lCb0hWd3IyaFxuL2IrdEF5QzNLQmpNdTl3WS8rOE91cEVsZ0dxaW83aXlRVklLU3p4M2dKWSt5SkVNZFRQb2N6VmJBM2lheW4rclxuT0hQME95UU5PSUQwSXJ4S0pNSGRVUkpOdy9lYnZ1dnpBSmRTcUoyemJqMG8wd3UySGMyY2k4ajZwVDNKblVFalxuZ0RnSmNKcWlLbnpDb0VLcy9pRzBaeWxoc3BtbDBWNlBGeVBWcGNsaWdNdDV1KzFWa3ltWFBFTWZGL2tUWWNzR1xuYjhya0ZKelBNbkZrN2luR2xUS3RSTEhCOFBBK0hJeE85N1ZITTNDcE04WFRtQkoxZnNQVWYwQUg3M3daUDhuRlxuZzZ6UjJmRVpaaXhzalVCTWovTTNmbzE4c01GenA3NGpRQjRXQlhrUE5OdytzOWtlUENVTCt4cCthL1lFeDdBdFxuZDdlVEgrMnRBZ01CQUFFQ2dnRUFKM0R2U3ZWaEl4L3JGUlNvdGxFUldrNEFCUE93TUlJYjVpRHBtU0p4bE9IMVxuTjlrVHZGeFNtL0FGdlUxSXFURUYra041dEhVVVFaR0FyOFZjNlhNWVdDOTkzdE11Y3d4MXRVeDAzbXhOR1luSFxuTWJOa2JFcnFpdFF2WnZIcnUrR0I1TGRoeDF0OXhYMm00KyttaXhhYXE4cTh2cHladjFHZTNudE1neENpMnJGaFxuRzRXOTk2Znk1TXRBT3Zmcm9TTmt4b2xjRjJ0bE5FbVQzYUx4TGQ2elhEUVo0Umw4RzVqaDl3Q2ltY3cycW1pdFxuSm5GV0ZWL3I2YWtTcUNkZGkyUTlST2pDZnJoc2FsZmxWZ3dqeFM3b04wbTFWWWJnN01VUHJaMFhjSHovaE9HMlxuMGRtTTVYRExwMkZ2Vm5GTENYNUZBMjIraVFDd05HUjNVU1YyZmNhNk1RS0JnUUQ2am5uM2Z6L25tN0VkVE10eFxub0Q0aE9PNWpGRnd2SXZScGVhZEFmM1lndnlENUtPZlZqVGdqNHMzQ29TTnFlc1Q2LzdMbEhMeWdpTE1acGxVSVxuejVJL3VXZXovQkJ2cnZpa1lEeTg3Vm9MY0U0Q1BvbElUeGs1Z0p1WHBEb1Q1NGZZNFp6TzNteHhGdm0yVHkvQ1xubER5akJxTUdsVEduYUZaWVl2WlpxbVM3cFFLQmdRRGN3WHNyMjdPRHEvNzFySFhGbTBTMUlVaWhPMGx1MmxhTFxuc0lYWWZaZjJ3SzVSZlFPKy9WK01veStHZmNXeEJIQisyZGhqQk1yR05RQ3J6dVQwamZPYkxrdmp2NHQ4R1RiTFxuT1ZDSENJMVpJZ2Q0ck1ENHBuZ0NyZVM1ZlZiNTIxQ3QrNkFFL3pnemhibm9ZcnVqaHZFMnJ2bDU1QUJ6dHRoQlxuRUVJWmRnMXJhUUtCZ0VYNWlvaWJpajVsMWZZbjMxMlJjaWlYSE1TaENBbkdDbHAydGtZbUV0aWNhRm9ObVltalxua2YwN3QxbFc1V3cwYzFUaUdwVXdER0lOSzIvTGEwNDFvbE9YdFNXb0RQTVQrNjcwamFINTY3N3NFMjAvQjlvZ1xuOVJ1QkZuTW9VMndCcW9mZ29vbUh4dU5pbGtUYklxeUY5OVZUNGkzUmR2ZVpCUnhVTHhibHBwSmRBb0dBRzhyMFxuTWVwZ0tIU3dEY2dmcjdoRHB6WkFpYVFJTTcralk4VGVwUW55NXVzTlIwOGcrSnUzdXVJVXFxOE5BNk5XY25JRVxuenpxY09PWVZab3dPd1VkWjR6Q3A5MHQzU1RGM2Q1Q0l0ZWQ2dkQwUGliN2VNSy9zcmhHc21UblJpSFYzSytCaFxuSGgvdnVIVGVtZ1pNTDJOZTNRNmNkQjhqZTI0S3ZlNUpGQ0dMd1BrQ2dZQXhCbksxSkxDVEhPRUhiSDFaRWpFaFxuZHpjd1R5WWI1bmgzclozanEzNC9jeXMzTjZldkZtR083a3UvUldtSHVtNGcreGtvakR5aVhkTFNEK0Mxei9xTVxuUVhBVGlWWmJFVHpIaGZudFl5NnlqQ0MzWERsV29Nb2lvZ21YVGRxdGFTZHNrdWRVYXJzUUdQYWFqb1FuMDEyRlxuckV6UE4yKzVOelRYd0RYZERoOGdTQT09XG4tLS0tLUVORCBQUklWQVRFIEtFWS0tLS0tXG4iLAogICJjbGllbnRfZW1haWwiOiAiZmlyZWJhc2UtYWRtaW5zZGstZmJzdmNAZ2xpbS1jaXR5LmlhbS5nc2VydmljZWFjY291bnQuY29tIiwKICAiY2xpZW50X2lkIjogIjEwMTkwMTIyMTEyNzYzNjMzNDQ4MSIsCiAgImF1dGhfdXJpIjogImh0dHBzOi8vYWNjb3VudHMuZ29vZ2xlLmNvbS9vL29hdXRoMi9hdXRoIiwKICAidG9rZW5fdXJpIjogImh0dHBzOi8vb2F1dGgyLmdvb2dsZWFwaXMuY29tL3Rva2VuIiwKICAiYXV0aF9wcm92aWRlcl94NTA5X2NlcnRfdXJsIjogImh0dHBzOi8vd3d3Lmdvb2dsZWFwaXMuY29tL29hdXRoMi92MS9jZXJ0cyIsCiAgImNsaWVudF94NTA5X2NlcnRfdXJsIjogImh0dHBzOi8vd3d3Lmdvb2dsZWFwaXMuY29tL3JvYm90L3YxL21ldGFkYXRhL3g1MDkvZmlyZWJhc2UtYWRtaW5zZGstZmJzdmMlNDBnbGltLWNpdHkuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLAogICJ1bml2ZXJzZV9kb21haW4iOiAiZ29vZ2xlYXBpcy5jb20iCn0K
-  twilio:
-    account-sid: SK442db45c9d4a0d15bf070b2ae29ca5a3
-    auth-token: LLvuYKXx7RfinmQ6xbtTkYiPms663VuA
-    trial-number: +17372508034
-    messaging-service-sid: a
-    status-callback-url: a
-    client-secret: LLvuYKXx7RfinmQ6xbtTkYiPms663VuA
+  mail:
+    brevo-smtp: xsmtpsib-625a819eff631b5da54d1b1a10aad99458d164820738eb8f9887d60b882ffb01-OQEXRX12RBTpreCs
+    from: awaprecious3t@gmail.com
+    from-name: GLIM City
+    verification-ttl: 24h
+    reset-code-ttl: 15m
+    reset-max-attempts: 5
+    resend-cooldown: 60s
+    max-sends-per-hour: 5
   storage:
     provider: r2
     endpoint: https://415d23cb90f89dfd858446f5d2b0f2ed.r2.cloudflarestorage.com

@@ -8,13 +8,13 @@ import java.util.function.Function;
 @Getter
 public enum NotificationType {
     OTP_REGISTRATION("otp.registration",
-            Set.of(Channel.SMS), Mode.BLOCKING, null, false, false),
+            Set.of(Channel.EMAIL), Mode.BLOCKING, null, false, false),
 
     OTP_PASSWORD_RESET("otp.password.reset",
-            Set.of(Channel.SMS), Mode.BLOCKING, null, false, false),
+            Set.of(Channel.EMAIL), Mode.BLOCKING, null, false, false),
 
     STAFF_INVITATION("staff.invitation",
-            Set.of(Channel.SMS), Mode.BLOCKING, null, false, false),
+            Set.of(Channel.EMAIL), Mode.BLOCKING, null, false, false),
 
     PAYMENT_SUCCESS("payment.success",
             Set.of(Channel.PUSH, Channel.INBOX), Mode.ASYNC, null, false, true),
@@ -70,6 +70,6 @@ public enum NotificationType {
 
     public boolean isOptOutAllowed() { return preferenceAccessor != null; }
 
-    public enum Channel { SMS, PUSH, INBOX }
+    public enum Channel { SMS, PUSH, INBOX, EMAIL }
     public enum Mode { BLOCKING, ASYNC }
 }

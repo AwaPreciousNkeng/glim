@@ -1,5 +1,8 @@
 package com.codewithpcodes.glimserver.auth;
 
+import com.codewithpcodes.glimserver.auth.dtos.LoginRequest;
+import com.codewithpcodes.glimserver.auth.dtos.AuthenticationResponse;
+import com.codewithpcodes.glimserver.auth.dtos.RegisterRequest;
 import com.codewithpcodes.harmoniq.user.UserResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,7 +55,7 @@ public class AuthenticationController {
 
     @PostMapping("/authenticate")
     public ResponseEntity<UserResponse> authenticate(
-            @Valid @RequestBody AuthenticationRequest request
+            @Valid @RequestBody LoginRequest request
     ) {
         AuthenticationResponse authResponse = service.authenticate(request);
         return getUserResponse(authResponse);

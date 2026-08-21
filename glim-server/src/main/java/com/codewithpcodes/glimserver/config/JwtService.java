@@ -1,24 +1,32 @@
 package com.codewithpcodes.glimserver.config;
 
+import com.codewithpcodes.glimserver.token.TokenRepository;
 import com.codewithpcodes.glimserver.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+@Slf4j
 @Service
 public class JwtService {
 
+    private final TokenRepository tokenRepository;
     @Value("${glim.jwt.secret}")
     private String secretKey;
 
@@ -27,6 +35,10 @@ public class JwtService {
 
     @Value("${glim.jwt.refresh-token.expiration}")
     private long refreshTokenExpiration;
+
+    public JwtService(TokenRepository tokenRepository) {
+        this.tokenRepository = tokenRepository;
+    }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -107,5 +119,12 @@ public class JwtService {
 
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
+    }
+
+    @Scheduled(cron = "0 0 3 * * *")
+    @Transactional
+    public void purgeExpired() {
+        int removed = tokenRepository.deleteExpiredBefore(Instant.now().minus(30, ChronoUnit.DAYS));
+        if (removed > 0) log.info("Purged {} expired refresh tokens", removed);
     }
 }
