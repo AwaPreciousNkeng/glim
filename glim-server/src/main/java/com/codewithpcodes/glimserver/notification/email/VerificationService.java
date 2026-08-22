@@ -60,7 +60,7 @@ public class VerificationService {
     }
 
     @Transactional
-    public User consumeVerificationToken(String plainToken) {
+    public void consumeVerificationToken(String plainToken) {
         VerificationCode token = codeRepository
                 .findByCodeHashAndPurpose(HashUtil.sha256(plainToken), CodePurpose.VERIFY_EMAIL)
                 .orElseThrow(() -> new InvalidCodeException("This verification link is not valid"));
@@ -73,7 +73,6 @@ public class VerificationService {
 
         User user = token.getUser();
         user.setEmailVerifiedAt(Instant.now());
-        return user;
     }
 
     @Transactional

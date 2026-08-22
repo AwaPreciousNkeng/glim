@@ -31,12 +31,10 @@ public class AuthenticationController {
                 .body(service.register(request));
     }
 
-    @GetMapping("/verify-email")
-    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
+    @PostMapping("/verify-email")
+    public ResponseEntity<Void> verifyEmail(@RequestParam String token) {
         verificationService.consumeVerificationToken(token);
-        return ResponseEntity.ok()
-                .contentType(MediaType.TEXT_HTML)
-                .body(verifiedPage());
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/password/forgot")
