@@ -19,7 +19,7 @@ public class RecipientQueryRepository {
         String preferenceColumn = preferenceColumnFor(type);
 
         StringBuilder sql = new StringBuilder("""
-            SELECT u.id, u.preferred_language, u.phone
+            SELECT u.id, u.preferred_language, u.email
             FROM users u
             LEFT JOIN notification_preferences p ON p.user_id = u.id
             WHERE u.status = 'ACTIVE'
@@ -51,8 +51,8 @@ public class RecipientQueryRepository {
 
         return jdbc.query(sql.toString(), params, (rs, i) -> new NotificationDispatcher.Recipient(
                 UUID.fromString(rs.getString("id")),
-                rs.getString("preferred_language"),
-                rs.getString("phone")));
+                rs.getString("language"),
+                rs.getString("email")));
     }
 
     public boolean isTypeEnabled(UUID userId, NotificationType type) {

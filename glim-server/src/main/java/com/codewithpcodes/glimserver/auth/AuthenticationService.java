@@ -199,7 +199,7 @@ public class AuthenticationService {
         verificationService.sendVerificationEmail(user);
     }
 
-    private void revokeAllUserTokens(User user) {
+    public void revokeAllUserTokens(User user) {
         var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
         if (validUserTokens.isEmpty()) return;
         validUserTokens.forEach(token -> {

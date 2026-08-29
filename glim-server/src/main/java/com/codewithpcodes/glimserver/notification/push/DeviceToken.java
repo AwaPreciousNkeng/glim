@@ -1,4 +1,4 @@
-package com.codewithpcodes.glimserver.notification;
+package com.codewithpcodes.glimserver.notification.push;
 
 import jakarta.persistence.*;
 import lombok.*;

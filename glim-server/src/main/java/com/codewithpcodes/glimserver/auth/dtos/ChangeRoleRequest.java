@@ -9,6 +9,6 @@ public record ChangeRoleRequest(
         @NotNull(message = "UserId Is not provided.")
         UUID userId,
         @NotNull(message = "User's new role is not provided")
-        Role role
+        Role newRole
 ) {
 }

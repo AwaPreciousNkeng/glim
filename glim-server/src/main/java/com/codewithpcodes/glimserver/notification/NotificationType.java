@@ -7,14 +7,6 @@ import java.util.function.Function;
 
 @Getter
 public enum NotificationType {
-    OTP_REGISTRATION("otp.registration",
-            Set.of(Channel.EMAIL), Mode.BLOCKING, null, false, false),
-
-    OTP_PASSWORD_RESET("otp.password.reset",
-            Set.of(Channel.EMAIL), Mode.BLOCKING, null, false, false),
-
-    STAFF_INVITATION("staff.invitation",
-            Set.of(Channel.EMAIL), Mode.BLOCKING, null, false, false),
 
     PAYMENT_SUCCESS("payment.success",
             Set.of(Channel.PUSH, Channel.INBOX), Mode.ASYNC, null, false, true),
@@ -34,6 +26,9 @@ public enum NotificationType {
             Set.of(Channel.PUSH, Channel.INBOX), Mode.ASYNC,
             NotificationPreference::isAnnouncements, true, true),
 
+    ROLE_GRANTED("role.granted",
+            Set.of(Channel.PUSH, Channel.INBOX, Channel.EMAIL), Mode.ASYNC, null, false, true),
+
     DAILY_DEVOTIONAL("devotional.daily",
             Set.of(Channel.PUSH), Mode.ASYNC,
             NotificationPreference::isDevotionals, true, false),
@@ -44,10 +39,7 @@ public enum NotificationType {
 
     EVENT_REMINDER("event.reminder",
             Set.of(Channel.PUSH, Channel.INBOX), Mode.ASYNC,
-            NotificationPreference::isEvents, true, true),
-
-    TESTIMONY_APPROVED("testimony.approved",
-            Set.of(Channel.PUSH, Channel.INBOX), Mode.ASYNC, null, false, true);
+            NotificationPreference::isEvents, true, true);
 
     private final String messageKey;
     private final Set<Channel> channels;
@@ -70,6 +62,6 @@ public enum NotificationType {
 
     public boolean isOptOutAllowed() { return preferenceAccessor != null; }
 
-    public enum Channel { SMS, PUSH, INBOX, EMAIL }
+    public enum Channel { PUSH, INBOX, EMAIL }
     public enum Mode { BLOCKING, ASYNC }
 }

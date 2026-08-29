@@ -75,4 +75,16 @@ public class EmailTemplateRenderer {
 
         return SHELL.formatted(inner);
     }
+
+    public String render(String title, String body, String actionUrl, String actionLabel) {
+        String action = (actionUrl == null || actionUrl.isBlank()) ? "" : """
+            <p style="text-align:center;margin:24px 0 0">
+              <a href="%s" style="background:#1B6B3A;color:#fff;padding:12px 24px;
+                 border-radius:10px;text-decoration:none;font-weight:600;
+                 display:inline-block">%s</a>
+            </p>
+            """.formatted(actionUrl, actionLabel == null ? "Open" : actionLabel);
+
+        return SHELL.formatted(title, body, action);
+    }
 }

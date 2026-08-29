@@ -20,4 +20,6 @@ public interface ScheduledNotificationRepository extends JpaRepository<Scheduled
     List<ScheduledNotification> lockDueBatch(@Param("now") Instant now, @Param("limit") int limit);
 
     List<ScheduledNotification> findByStatusOrderByScheduledForAsc(String status);
+
+    long countByStatus(String status);
 }

@@ -1,10 +1,13 @@
 package com.codewithpcodes.glimserver.notification;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -41,5 +44,24 @@ public interface NotificationDeliveryRepository extends JpaRepository<Notificati
         """, nativeQuery = true)
     Optional<BatchStatsProjection> statsFor(@Param("batchId") UUID batchId);
 
-    Optional<NotificationDelivery> findByProviderId(String sid);
+    @Query("""
+        SELECT d FROM NotificationDelivery d
+        WHERE d.batchId = :batchId AND d.status = :status
+        """)
+    List<NotificationDelivery> findByBatchAndStatus(@Param("batchId") UUID batchId,
+                                                    @Param("status") String status);
+
+    /** Rolling health check across all pushes in a window. */
+    @Query(value = """
+        SELECT COUNT(*) FILTER (WHERE status = 'SENT')      AS sent,
+               COUNT(*) FILTER (WHERE status = 'FAILED')    AS failed,
+               COUNT(*) FILTER (WHERE status = 'NO_DEVICE') AS noDevice
+        FROM notification_deliveries
+        WHERE channel = 'PUSH' AND created_at > :since
+        """, nativeQuery = true)
+    Map<String, Object> healthSince(@Param("since") Instant since);
+
+    @Modifying
+    @Query("DELETE FROM NotificationDelivery d WHERE d.createdAt < :cutoff")
+    int deleteOlderThan(@Param("cutoff") Instant cutoff);
 }

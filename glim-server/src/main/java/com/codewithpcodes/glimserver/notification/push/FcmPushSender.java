@@ -1,4 +1,4 @@
-package com.codewithpcodes.glimserver.notification;
+package com.codewithpcodes.glimserver.notification.push;
 
 import com.google.firebase.messaging.*;
 import com.google.firebase.messaging.Notification;

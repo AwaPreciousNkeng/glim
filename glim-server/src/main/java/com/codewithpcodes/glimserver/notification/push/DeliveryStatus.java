@@ -1,4 +1,4 @@
-package com.codewithpcodes.glimserver.notification;
+package com.codewithpcodes.glimserver.notification.push;
 
 public enum DeliveryStatus {
     SENT,               // provider accepted it

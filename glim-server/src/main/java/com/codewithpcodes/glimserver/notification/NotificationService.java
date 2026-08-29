@@ -3,8 +3,12 @@ package com.codewithpcodes.glimserver.notification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Slf4j
@@ -13,11 +17,8 @@ import java.util.UUID;
 public class NotificationService {
 
     private final NotificationDispatcher dispatcher;
+    private final NotificationDeliveryRepository notificationDeliveryRepository;
 
-    /**
-     * Send to one member. BLOCKING types (OTP) propagate failure so the
-     * caller's transaction rolls back. ASYNC types return immediately.
-     */
     public void notify(NotificationDispatcher.Recipient recipient, NotificationType type,
                        String deepLink, Object... args) {
 
@@ -55,4 +56,5 @@ public class NotificationService {
                              String deepLink, Object... args) {
         return dispatcher.dispatchToAudience(audience, type, deepLink, args);
     }
+
 }

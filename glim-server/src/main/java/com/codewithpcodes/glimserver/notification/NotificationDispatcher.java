@@ -1,5 +1,11 @@
 package com.codewithpcodes.glimserver.notification;
 
+import com.codewithpcodes.glimserver.notification.email.EmailTemplateRenderer;
+import com.codewithpcodes.glimserver.notification.email.SmtpEmailSender;
+import com.codewithpcodes.glimserver.notification.push.DeliveryStatus;
+import com.codewithpcodes.glimserver.notification.push.DeviceToken;
+import com.codewithpcodes.glimserver.notification.push.DeviceTokenRepository;
+import com.codewithpcodes.glimserver.notification.push.FcmPushSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -20,31 +26,30 @@ public class NotificationDispatcher {
     private final NotificationRepository inboxRepository;
     private final NotificationDeliveryRepository deliveryRepository;
     private final RecipientQueryRepository recipientRepository;
+    private final SmtpEmailSender emailSender;
+    private final EmailTemplateRenderer emailRenderer;
 
     /** A member as far as notifications are concerned — no full User needed. */
     public record Recipient(UUID userId, String language, String email) {}
 
-    // ---------------------------------------------------------------
-    // SINGLE RECIPIENT
-    // ---------------------------------------------------------------
 
+    // SINGLE RECIPIENT
     @Transactional
-    public UUID dispatchToOne(Recipient recipient, NotificationType type,
+    public void dispatchToOne(Recipient recipient, NotificationType type,
                               String deepLink, Object... args) {
 
         UUID batchId = UUID.randomUUID();
 
         // Opt-out check. Absence of a preference row means "everything on",
         // so we never need to create rows for members who never change settings.
-        if (type.isOptOutAllowed() && !isEnabled(recipient.userId(), type)) {
+        if (type.isOptOutAllowed() && !recipientRepository.isTypeEnabled(recipient.userId, type)) {
             recordDelivery(batchId, recipient.userId(), type,
                     NotificationType.Channel.PUSH, DeliveryStatus.SKIPPED_OPTED_OUT, null, null);
-            return batchId;
+            return;
         }
 
         Rendered text = render(type, recipient.language(), args);
         deliver(batchId, List.of(recipient), type, text, deepLink);
-        return batchId;
     }
 
     // ---------------------------------------------------------------
@@ -94,11 +99,28 @@ public class NotificationDispatcher {
         if (type.getChannels().contains(NotificationType.Channel.PUSH)) {
             deliverPush(batchId, recipients, type, text, deepLink);
         }
-        if (type.getChannels().contains(NotificationType.Channel.SMS)) {
-            deliverSms(batchId, recipients, type, text);
+        if (type.getChannels().contains(NotificationType.Channel.EMAIL)) {
+            deliverEmail(batchId, recipients, type, text, deepLink);
         }
         if (type.getChannels().contains(NotificationType.Channel.INBOX) && type.isStoredInInbox()) {
             deliverInbox(batchId, recipients, type, text, deepLink);
+        }
+    }
+
+    private void deliverEmail(UUID batchId, List<Recipient> recipients, NotificationType type,
+                              Rendered text, String deepLink) {
+        String actionUrl = deepLink == null ? null : absoluteUrl(deepLink);
+        for (Recipient r : recipients) {
+            if (r.email == null) {
+                recordDelivery(batchId, r.userId(), type,
+                        NotificationType.Channel.EMAIL, DeliveryStatus.NO_DEVICE, null, null);
+                continue;
+            }
+            emailSender.send(r.email(), text.title(),
+                    emailRenderer.render(text.title(), text.body(), actionUrl, "Open GLIM City"));
+
+            recordDelivery(batchId, r.userId(), type,
+                    NotificationType.Channel.EMAIL, DeliveryStatus.SENT, null, null);
         }
     }
 
@@ -152,10 +174,14 @@ public class NotificationDispatcher {
     private record Rendered(String title, String body) {}
 
     private Rendered render(NotificationType type, String language, Object... args) {
-        Locale locale = Locale.of(language == null ? "en" : language.toLowerCase());
+        Locale locale = Locale.of(language == null ? "english" : language.toLowerCase());
         String title = messages.getMessage(type.getMessageKey() + ".title", args, locale);
         String body  = messages.getMessage(type.getMessageKey() + ".body",  args, locale);
         return new Rendered(title, body);
+    }
+
+    private String absoluteUrl(String deepLink) {
+        return deepLink.startsWith("http") ? deepLink : null;
     }
 
     private boolean isEnabled(UUID userId, NotificationType type) {
