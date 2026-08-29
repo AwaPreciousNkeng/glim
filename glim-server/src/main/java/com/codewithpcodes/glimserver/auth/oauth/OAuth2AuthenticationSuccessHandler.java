@@ -1,7 +1,7 @@
 package com.codewithpcodes.glimserver.auth.oauth;
 
-import com.codewithpcodes.harmoniq.config.JwtService;
-import com.codewithpcodes.harmoniq.user.User;
+import com.codewithpcodes.glimserver.config.JwtService;
+import com.codewithpcodes.glimserver.user.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;

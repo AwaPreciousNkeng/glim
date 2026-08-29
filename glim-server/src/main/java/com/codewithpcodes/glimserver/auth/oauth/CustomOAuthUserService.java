@@ -1,9 +1,9 @@
 package com.codewithpcodes.glimserver.auth.oauth;
 
-import com.codewithpcodes.harmoniq.user.OAuthProvider;
-import com.codewithpcodes.harmoniq.user.Role;
-import com.codewithpcodes.harmoniq.user.User;
-import com.codewithpcodes.harmoniq.user.UserRepository;
+import com.codewithpcodes.glimserver.user.OAuthProvider;
+import com.codewithpcodes.glimserver.user.Role;
+import com.codewithpcodes.glimserver.user.User;
+import com.codewithpcodes.glimserver.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -51,8 +51,8 @@ public class CustomOAuthUserService extends DefaultOAuth2UserService {
                 .email(userInfo.getEmail())
                 .oAuthProvider(OAuthProvider.GOOGLE)
                 .providerId(userInfo.getId())
-                .profilePictureUrl(userInfo.getImageUrl())
-                .role(Role.USER)
+                .avatarKey(userInfo.getImageUrl())
+                .role(Role.MEMBER)
                 .build();
         return userRepository.save(user);
     }
@@ -62,7 +62,7 @@ public class CustomOAuthUserService extends DefaultOAuth2UserService {
             throw new OAuth2AuthenticationException("This email is already registered with a password. " +
                     "Please sign in  with your email and password");
         }
-        user.setProfilePictureUrl(userInfo.getImageUrl());
+        user.setAvatarKey(userInfo.getImageUrl());
         user.setProviderId(userInfo.getId());
         return userRepository.save(user);
     }

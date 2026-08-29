@@ -84,7 +84,7 @@ public class VerificationService {
         }
 
         invalidatePrevious(user, CodePurpose.PASSWORD_RESET);
-        String code = randomDigits(6);
+        String code = randomDigits();
 
         codeRepository.save(VerificationCode.builder()
                         .user(user)
@@ -142,9 +142,9 @@ public class VerificationService {
                 .ifPresent(t -> t.setConsumedAt(Instant.now()));
     }
 
-    private String randomDigits(int length) {
-        StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
+    private String randomDigits() {
+        StringBuilder sb = new StringBuilder(6);
+        for (int i = 0; i < 6; i++) {
             sb.append(random.nextInt(10));
         }
         return sb.toString();

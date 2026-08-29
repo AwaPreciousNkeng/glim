@@ -5,6 +5,5 @@ public enum Role {
     FINANCE,
     MEMBER,
     MEDIA,
-    DEPARTMENT_HEAD,
     ADMIN()
 }

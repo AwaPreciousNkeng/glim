@@ -7,6 +7,7 @@ import com.codewithpcodes.glimserver.user.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -47,7 +48,8 @@ public class SecurityConfig {
             "/configuration/ui",
             "/configuration/security",
             "/swagger-ui.html",
-            "/api/v1/webhooks/**"
+            "/api/v1/webhooks/**",
+            ""
     };
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authProvider;
@@ -66,9 +68,20 @@ public class SecurityConfig {
                 .authorizeHttpRequests(req ->
                         req.requestMatchers(AUTH_WHITELIST)
                                 .permitAll()
+                                .requestMatchers(HttpMethod.GET,
+                                        "/api/v1/announcements/**",
+                                        "/api/v1/devotionals/**",
+                                        "/api/v1/verses/**",
+                                        "/api/v1/sermons/**",
+                                        "/api/v1/events/**",
+                                        "/api/v1/ministries/**",
+                                        "/api/v1/live/**",
+                                        "/api/v1/church/**")
+                                .permitAll()
                                 .requestMatchers("/api/v1/admin/**").hasRole(Role.ADMIN.name())
-                                .requestMatchers("/api/v1/mog/**").hasRole(Role.MOG.name())
-                                .requestMatchers("/api/v1/glim-finances/**").hasRole(Role.FINANCE.name())
+                                .requestMatchers("/api/v1/pastor/**").hasAnyRole(Role.PASTOR.name(), Role.ADMIN.name())
+                                .requestMatchers("/api/v1/glim-finances/**").hasAnyRole(Role.FINANCE.name(), Role.ADMIN.name())
+                                .requestMatchers("/api/v1/glim-media/**").hasAnyRole(Role.MEDIA.name(), Role.ADMIN.name())
                                 .anyRequest()
                                 .authenticated()
                 )
@@ -126,7 +139,6 @@ public class SecurityConfig {
                 "PATCH"
         ));
         source.registerCorsConfiguration("/**", config);
-
         return source;
     }
 }

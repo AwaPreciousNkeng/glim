@@ -1,6 +1,6 @@
 package com.codewithpcodes.glimserver.auth.oauth;
 
-import com.codewithpcodes.harmoniq.user.User;
+import com.codewithpcodes.glimserver.user.User;
 import lombok.Getter;
 import lombok.NonNull;
 import org.springframework.security.core.GrantedAuthority;
