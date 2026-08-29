@@ -39,7 +39,12 @@ public enum NotificationType {
 
     EVENT_REMINDER("event.reminder",
             Set.of(Channel.PUSH, Channel.INBOX), Mode.ASYNC,
-            NotificationPreference::isEvents, true, true);
+            NotificationPreference::isEvents, true, true),
+
+    RECONCILIATION_NEEDED("reconciliation.needed",
+            Set.of(Channel.PUSH, Channel.INBOX, Channel.EMAIL), Mode.ASYNC, null, false, true);
+
+
 
     private final String messageKey;
     private final Set<Channel> channels;
