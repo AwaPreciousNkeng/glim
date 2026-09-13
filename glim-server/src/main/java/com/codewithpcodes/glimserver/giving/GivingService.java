@@ -89,6 +89,14 @@ public class GivingService {
         ))
     }
 
+    private String[] splitPhone(String e164) {
+        String digits = e164.replaceAll("[^0-9]", "");
+        String cc = "237";
+        return digits.startsWith(cc)
+                ? new String[]{cc, digits.substring(cc.length())}
+                : new String[]{cc, digits};
+    }
+
     @Transactional
     public void applyVerification(
             Transaction transaction,

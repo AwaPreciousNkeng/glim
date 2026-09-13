@@ -29,8 +29,7 @@ public class NotificationDispatcher {
     private final SmtpEmailSender emailSender;
     private final EmailTemplateRenderer emailRenderer;
 
-    /** A member as far as notifications are concerned — no full User needed. */
-    public record Recipient(UUID userId, String language, String email) {}
+
 
 
     // SINGLE RECIPIENT
@@ -42,7 +41,7 @@ public class NotificationDispatcher {
 
         // Opt-out check. Absence of a preference row means "everything on",
         // so we never need to create rows for members who never change settings.
-        if (type.isOptOutAllowed() && !recipientRepository.isTypeEnabled(recipient.userId, type)) {
+        if (type.isOptOutAllowed() && !recipientRepository.isTypeEnabled(recipient.userId(), type)) {
             recordDelivery(batchId, recipient.userId(), type,
                     NotificationType.Channel.PUSH, DeliveryStatus.SKIPPED_OPTED_OUT, null, null);
             return;
@@ -111,7 +110,7 @@ public class NotificationDispatcher {
                               Rendered text, String deepLink) {
         String actionUrl = deepLink == null ? null : absoluteUrl(deepLink);
         for (Recipient r : recipients) {
-            if (r.email == null) {
+            if (r.email() == null) {
                 recordDelivery(batchId, r.userId(), type,
                         NotificationType.Channel.EMAIL, DeliveryStatus.NO_DEVICE, null, null);
                 continue;

@@ -73,16 +73,18 @@ public class GivingController {
     }
 
     @GetMapping("/summary")
-    public Map<String, Object> summary(
+    public ResponseEntity<Map<String, Object>> summary(
             @AuthenticationPrincipal User user,
             @RequestParam(defaultValue = "2026") int year
     ) {
         Instant from = Instant.parse(year + "-01-01T00:00:00Z");
         Instant to = Instant.parse(year + "-12-31T23:59:59Z");
-        return Map.of(
+        return ResponseEntity.ok(
+                Map.of(
                 "year", year,
                 "total", transactionRepository.totalForUser(user.getId(), from, to),
-                "currency", "XAF");
+                "currency", "XAF")
+        );
     }
 
     @GetMapping("/payment-methods")

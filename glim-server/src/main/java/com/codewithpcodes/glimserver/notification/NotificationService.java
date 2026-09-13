@@ -3,12 +3,8 @@ package com.codewithpcodes.glimserver.notification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Slf4j
@@ -19,7 +15,7 @@ public class NotificationService {
     private final NotificationDispatcher dispatcher;
     private final NotificationDeliveryRepository notificationDeliveryRepository;
 
-    public void notify(NotificationDispatcher.Recipient recipient, NotificationType type,
+    public void notify(Recipient recipient, NotificationType type,
                        String deepLink, Object... args) {
 
         if (type.getMode() == NotificationType.Mode.BLOCKING) {
@@ -30,7 +26,7 @@ public class NotificationService {
     }
 
     @Async("notificationExecutor")
-    public void notifyAsync(NotificationDispatcher.Recipient recipient, NotificationType type,
+    public void notifyAsync(Recipient recipient, NotificationType type,
                             String deepLink, Object... args) {
         try {
             dispatcher.dispatchToOne(recipient, type, deepLink, args);

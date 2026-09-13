@@ -25,10 +25,11 @@ public class PaymentWebhookController {
     @Transactional
     public ResponseEntity<Void> receive(
             @RequestBody String rawBody,
-            @RequestHeader(value = "verif-hash", required = false) String signature
+            @RequestHeader(value = "flutterwave-signature", required = false) String signature
     ) {
         var webhook = paymentProvider.parseWebhook(rawBody, signature);
-        if (!webhook.valid()) return ResponseEntity.status(403).build();
+        if (!webhook.valid()) return ResponseEntity.status(401).build();
+        if (webhook.reference() == null) return ResponseEntity.ok().build();
 
         var transaction = transactionRepository.findByReference(webhook.reference()).orElse(null);
         if (transaction == null) {
@@ -36,9 +37,13 @@ public class PaymentWebhookController {
             return ResponseEntity.ok().build();
         }
 
+        if (transaction.getState() == webhook.result().state()) {
+            return ResponseEntity.ok().build();
+        }
+
         var before = transaction.getState();
 
-        var verified = paymentProvider.verify(webhook.reference());
+        var verified = paymentProvider.verify(webhook.providerChargeId());
         givingService.applyVerification(transaction, verified, "WEBHOOK", null);
 
         if (before != transaction.getState()) {

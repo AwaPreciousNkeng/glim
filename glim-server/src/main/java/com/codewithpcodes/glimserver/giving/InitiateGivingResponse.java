@@ -16,8 +16,10 @@ public record InitiateGivingResponse(
         return new InitiateGivingResponse(
                 t.getId(),
                 t.getReference(),
-                t.getState(),
-                t
-        )
+                t.getState().name(),
+                "",
+                "",
+                t.getCheckoutUrl()
+        );
     }
 }

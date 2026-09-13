@@ -14,7 +14,7 @@ public class RecipientQueryRepository {
 
     private final NamedParameterJdbcTemplate jdbc;
 
-    public List<NotificationDispatcher.Recipient> resolve(Audience audience, NotificationType type) {
+    public List<Recipient> resolve(Audience audience, NotificationType type) {
 
         String preferenceColumn = preferenceColumnFor(type);
 
@@ -49,7 +49,7 @@ public class RecipientQueryRepository {
             case ALL_MEMBERS -> { }
         }
 
-        return jdbc.query(sql.toString(), params, (rs, i) -> new NotificationDispatcher.Recipient(
+        return jdbc.query(sql.toString(), params, (rs, i) -> new Recipient(
                 UUID.fromString(rs.getString("id")),
                 rs.getString("language"),
                 rs.getString("email")));
