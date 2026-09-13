@@ -18,7 +18,8 @@ import java.util.UUID;
 @Table(name = "audit_logs",
         indexes = {
                 @Index(name = "idx_audit_entity", columnList = "entity_type, entity_id"),
-                @Index(name = "idx_audit_actor",  columnList = "actor_id, created_at")
+                @Index(name = "idx_audit_actor",  columnList = "actor_id, created_at"),
+                @Index(name = "idx_audit_action", columnList = "action")
         })
 public class AuditLog {
 
@@ -29,7 +30,7 @@ public class AuditLog {
     @Column(name = "actor_id")
     private UUID actorId;
 
-    @Column(nullable = false, length = 60)
+    @Column(nullable = false, length = 100)
     private String action;
 
     @Column(name = "entity_type", nullable = false, length = 40)
@@ -46,8 +47,14 @@ public class AuditLog {
     @Column(name = "after_state", columnDefinition = "jsonb")
     private String afterState;
 
-    @Column(name = "ip_address", length = 45)
+    @Column(name = "ip_address", length = 100)
     private String ipAddress;
+
+    @Column(length = 100)
+    private String requestId;
+
+    @Column(length = 100)
+    private String serviceName;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

@@ -13,7 +13,6 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import java.net.URI;
 
 @Configuration
-@EnableConfigurationProperties(StorageProperties.class)
 public class StorageConfig {
 
     private final StorageProperties props;

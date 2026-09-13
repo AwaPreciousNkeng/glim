@@ -21,7 +21,6 @@ import java.time.temporal.ChronoUnit;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@EnableConfigurationProperties(MailProperties.class)
 public class VerificationService {
 
     private final VerificationCodeRepository codeRepository;

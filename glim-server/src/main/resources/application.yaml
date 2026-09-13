@@ -99,10 +99,9 @@ glim:
   flutterwave:
     auth-url: https://idp.flutterwave.com/realms/flutterwave/protocol/openid-connect/token
     base-url: https://developersandbox-api.flutterwave.com
-    encryption-key: kKjhUmjvcLpz7GnRLO/kcQyseqyawdShMWniGWb1Ds4=
     client-id: ac0f85cb-eb23-4d61-866d-44011c0d0edc
     client-secret: iPcGzyKcrhf7RK70yEtKTlz12TmveA2Y
     scenario-key:
-    webhook-secret-hash:
+    webhook-secret-hash: e53cebc65945cf5857e1bbd9970abe73e062991b304c554451c52b8c6728606d
   oauth2:
     redirect-url: http://localhost:3000/oauth2/redirect
