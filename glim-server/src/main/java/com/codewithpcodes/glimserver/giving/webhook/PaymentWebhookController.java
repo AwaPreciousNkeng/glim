@@ -4,6 +4,7 @@ import com.codewithpcodes.glimserver.giving.GivingNotifier;
 import com.codewithpcodes.glimserver.giving.GivingService;
 import com.codewithpcodes.glimserver.giving.PaymentProvider;
 import com.codewithpcodes.glimserver.giving.transaction.TransactionRepository;
+import com.codewithpcodes.glimserver.giving.transaction.TransactionTrigger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +45,7 @@ public class PaymentWebhookController {
         var before = transaction.getState();
 
         var verified = paymentProvider.verify(webhook.providerChargeId());
-        givingService.applyVerification(transaction, verified, "WEBHOOK", null);
+        givingService.applyVerification(transaction, verified, TransactionTrigger.WEBHOOK, null);
 
         if (before != transaction.getState()) {
             givingNotifier.notifyStateChange(transaction);

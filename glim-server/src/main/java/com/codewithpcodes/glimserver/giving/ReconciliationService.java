@@ -35,7 +35,7 @@ public class ReconciliationService {
         Transaction transaction = transactionRepository.findById(transactionId).orElseThrow();
 
         var result = paymentProvider.verify(transaction.getReference());
-        givingService.applyVerification(transaction, result, "MANUAL", actorID);
+        givingService.applyVerification(transaction, result, TransactionTrigger.MANUAL, actorID);
 
         auditService.record(actorID, "TRANSACTION_REVERIFY", "Transaction",
                 transaction.getId(), null, result.providerStatus());
@@ -57,7 +57,14 @@ public class ReconciliationService {
         Transaction transaction = transactionRepository.findById(transactionID).orElseThrow();
         var before = transaction.getState();
 
-        boolean changed = transactionStateService.transition(transaction, outcome, "MANUAL", reason, actorID);
+        boolean changed = transactionStateService.transition(
+                transaction,
+                outcome,
+                TransactionTrigger.MANUAL,
+                reason,
+                actorID
+        );
+
         if (!changed) {
             throw new IllegalStateException(
                     "Cannot move %s from %s to %s.".formatted(

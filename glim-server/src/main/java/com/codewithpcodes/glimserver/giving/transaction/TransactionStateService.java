@@ -19,7 +19,7 @@ public class TransactionStateService {
     public boolean transition(
             Transaction transaction,
             TransactionState nextState,
-            String trigger,
+            TransactionTrigger trigger,
             String reason,
             UUID actorId
     ) {
@@ -48,7 +48,7 @@ public class TransactionStateService {
                 .build()
         );
 
-        log.info("Transaction {} {} -> {} ({})", transaction.getReference(), current, nextState, trigger);
+        log.info("Transaction {} {} -> {} ({})", transaction.getReference(), current, nextState, trigger.name());
         return true;
     }
 }

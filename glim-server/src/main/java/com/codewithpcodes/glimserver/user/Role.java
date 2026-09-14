@@ -1,9 +1,10 @@
 package com.codewithpcodes.glimserver.user;
 
 public enum Role {
-    PASTOR(),
+    PASTOR,
     FINANCE,
     MEMBER,
     MEDIA,
-    ADMIN()
+    ADMIN,
+    PARTNER
 }

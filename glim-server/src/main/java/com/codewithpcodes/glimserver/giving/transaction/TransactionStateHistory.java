@@ -32,9 +32,9 @@ public class TransactionStateHistory {
     @Column(name = "to_state", nullable = false, length = 20)
     private TransactionState toState;
 
-    /** WEBHOOK | POLLING | MANUAL | SYSTEM — how the change was triggered. */
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private String trigger;
+    private TransactionTrigger trigger;
 
     @Column(length = 500)
     private String reason;

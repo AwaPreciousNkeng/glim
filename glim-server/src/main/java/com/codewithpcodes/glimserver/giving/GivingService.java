@@ -62,6 +62,7 @@ public class GivingService {
         int year = Year.now().getValue();
 
         String reference = "GLIM-TXN-%d-%06d".formatted(year, transactionRepository.nextSequenceForYear(year));
+        String[] phone = splitPhone(request.payerPhone());
 
         Transaction transaction = Transaction.builder()
                 .userId(userId)
@@ -78,15 +79,37 @@ public class GivingService {
                 .build();
         transactionRepository.save(transaction);
 
-        var session = paymentProvider.createCharge(new PaymentProvider.ChargeRequest(
+        var result = paymentProvider.createCharge(new PaymentProvider.ChargeRequest(
                 reference,
                 request.amount(),
                 "XAF",
                 user.getEmail(),
                 user.getFirstName(),
                 user.getLastName(),
-                request.payerPhone()
-        ))
+                phone[0],
+                phone[1],
+                request.network(),
+                request.idempotencyKey()
+        ));
+
+        transaction.setProviderChargeId(result.providerChargeId());
+        transaction.setProviderCustomerId(result.providerCustomerId());
+        transaction.setProviderPaymentMethodId(result.providerPaymentMethodId());
+        transaction.setProviderPayload(result.rawPayload());
+
+        transactionStateService.transition(transaction, TransactionState.PENDING,
+                TransactionTrigger.SYSTEM, "Charge created", null);
+
+        if (request.savePayerPhone()) savePaymentMethod(userId, request.payerPhone());
+
+        return new InitiateGivingResponse(
+                transaction.getId(),
+                transaction.getReference(),
+                transaction.getState().name(),
+                result.nextAction().name(),
+                result.instruction(),
+                result.redirectUrl()
+        );
     }
 
     private String[] splitPhone(String e164) {
@@ -101,7 +124,7 @@ public class GivingService {
     public void applyVerification(
             Transaction transaction,
             PaymentProvider.VerificationResult result,
-            String trigger,
+            TransactionTrigger trigger,
             UUID actorId
     ) {
         if (!result.found()) return;

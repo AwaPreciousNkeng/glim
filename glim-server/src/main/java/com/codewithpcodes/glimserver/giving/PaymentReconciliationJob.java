@@ -1,9 +1,6 @@
 package com.codewithpcodes.glimserver.giving;
 
-import com.codewithpcodes.glimserver.giving.transaction.Transaction;
-import com.codewithpcodes.glimserver.giving.transaction.TransactionRepository;
-import com.codewithpcodes.glimserver.giving.transaction.TransactionState;
-import com.codewithpcodes.glimserver.giving.transaction.TransactionStateService;
+import com.codewithpcodes.glimserver.giving.transaction.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -40,7 +37,7 @@ public class PaymentReconciliationJob {
 
             var before = transaction.getState();
             var result = paymentProvider.verify(transaction.getReference());
-            givingService.applyVerification(transaction, result, "POLLING", null);
+            givingService.applyVerification(transaction, result, TransactionTrigger.POLLING, null);
 
             if (before != transaction.getState()) {
                 givingNotifier.notifyStateChange(transaction);
@@ -60,7 +57,7 @@ public class PaymentReconciliationJob {
             transactionStateService.transition(
                     transaction,
                     TransactionState.NEEDS_REVIEW,
-                    "SYSTEM",
+                    TransactionTrigger.SYSTEM,
                     "Unresolved after %d polls".formatted(transaction.getPollAttempts()),
                     null
             );

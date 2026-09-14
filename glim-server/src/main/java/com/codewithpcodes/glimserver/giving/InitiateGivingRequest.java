@@ -18,7 +18,7 @@ public record InitiateGivingRequest(
         @NotBlank(message = "The payer's phone number is required.")
         String payerPhone,
 
-        @NotBlank
+        @NotBlank(message = "The mobile network is required")
         @Pattern(regexp = "MTN|ORANGE")
         String network,
 

@@ -22,7 +22,8 @@ public interface PaymentProvider {
             String phoneCountryCode,
             String phoneNumber,
             String network,          // MTN | ORANGE
-            String idempotencyKey) {}
+            String idempotencyKey
+    ) {}
 
 
     enum NextActionType { AWAIT_PHONE_AUTHORISATION, REDIRECT, NONE }
